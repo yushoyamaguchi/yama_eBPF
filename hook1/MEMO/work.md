@@ -1,0 +1,2 @@
+# 0629
+handle_triple_faultをhookしたほうがいかも
