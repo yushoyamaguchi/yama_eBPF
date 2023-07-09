@@ -8,6 +8,7 @@ bpftool prog load vcpu_enter_guest.o "/sys/fs/bpf/vcpu_enter_guest"
 ```
 
 これ以下は工事中
+(attachにはbpgtool perf attach を使うべき？)
 
 # attacch
 ```bash
