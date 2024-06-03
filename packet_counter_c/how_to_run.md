@@ -7,3 +7,6 @@
 # vmlinux.hを作る
 vmlinux.hは動的に生成する。
 make vmlinuxのところを参照。
+
+# bpf_printkの出力を確認する
+```sudo bpftool prog tracelog```
