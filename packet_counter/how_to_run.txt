@@ -1,0 +1,10 @@
+sudo ./netns.sh build
+go generate
+go build .
+
+
+
+sudo ip netns exec node1 ./packet_counter -iface veth1
+
+
+ping -c 3 192.168.0.2
