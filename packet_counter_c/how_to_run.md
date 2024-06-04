@@ -1,7 +1,7 @@
 # 事前インストール物
 - libbpf-dev
 - libbpfcc-dev
-- bpf-tools (linux-tools-$(uname -r)-generic, linux-cloud-tools-$(uname -r)-generic)
+- bpf-tools (linux-tools-$(uname -r), linux-cloud-tools-$(uname -r))
 
 
 # vmlinux.hを作る
