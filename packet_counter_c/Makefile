@@ -38,8 +38,6 @@ topology: clean-topology
 	$(SUDO) ./pair.sh
 
 
-	$(MAKE) -C ../ topology TOPO=pair
-
 .PHONY: clean-topology
 clean-topology:
 	$(SUDO) ip netns del host0 2>/dev/null || true
