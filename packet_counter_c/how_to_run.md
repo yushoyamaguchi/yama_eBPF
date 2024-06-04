@@ -13,3 +13,6 @@ sudo ip netns exec host1 ping 10.0.0.1
 
 # bpf_printkの出力を確認する
 sudo bpftool prog tracelog
+
+# bpf mapの中身を確認する
+sudo bpftool map dump name <map_name>
