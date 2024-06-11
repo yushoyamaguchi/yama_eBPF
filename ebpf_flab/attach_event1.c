@@ -7,6 +7,14 @@
 #include <errno.h>
 #include <fcntl.h>
 
+#include <signal.h>
+
+volatile sig_atomic_t stop = 0;
+
+void sigint_handler(int sig) {
+    stop = 1;
+}
+
 struct data_t {
     __s32 pkt_len;
 };
@@ -31,6 +39,7 @@ int main(int argc, char **argv) {
     char filename[256];
     const char *iface = "h0"; // interface name
     const char *bpf_obj = "./event1.bpf.o"; // path to your BPF object file
+    signal(SIGINT, sigint_handler);
 
     if (argc < 2) {
         fprintf(stderr, "Usage: %s <netns>\n", argv[0]);
@@ -104,7 +113,7 @@ int main(int argc, char **argv) {
     }
 
     // Poll the perf buffer
-    while (1) {
+    while (!stop) {
         int ret = perf_buffer__poll(pb, 100); // Timeout after 100ms
         if (ret == -1) {
             perror("perf_buffer__poll");
@@ -113,6 +122,7 @@ int main(int argc, char **argv) {
     }
 
     // Clean up
+    fprintf(stdout, "Detaching XDP program from interface %s\n", iface);
     perf_buffer__free(pb);
     bpf_link__destroy(link);
     bpf_object__close(obj);
