@@ -1,12 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "/home/yusho/dev/2024/others/libbpf/src/libbpf.h"
+#include <bpf/libbpf.h>
 #include <net/if.h>
 #include <unistd.h>
 #include <linux/if_link.h> /* XDP_FLAGS_UPDATE_IF_NOEXIST etc */
 #include <errno.h>
 #include <fcntl.h>
-#include <sched.h>
 
 #include <signal.h>
 
@@ -74,13 +73,10 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-
-    bpf_object__for_each_program(prog, obj) {
-        const char *sec_name = bpf_program__section_name(prog);
-        if (sec_name && strcmp(sec_name, "xdp") == 0) {
-            // sec_name が "xdp" と一致するプログラムが見つかりました
-            break;
-        }
+    prog = bpf_object__find_program_by_title(obj, "xdp");
+    if (!prog) {
+        fprintf(stderr, "ERROR: finding a program in BPF object file failed\n");
+        return 1;
     }
 
     if (bpf_object__load(obj)) {
@@ -96,17 +92,21 @@ int main(int argc, char **argv) {
 
     printf("XDP program successfully loaded and attached to interface %s\n", iface);
 
-    // Find the perf event map
+     // Find the perf event map
     struct bpf_map *perf_map = bpf_object__find_map_by_name(obj, "xdp_perf_event_map");
     if (!perf_map) {
         fprintf(stderr, "ERROR: finding perf event map in BPF object file failed\n");
         return 1;
     }
 
-
+    // Set up perf buffer options
+    struct perf_buffer_opts pb_opts = {
+        .sample_cb = handle_event,
+        .lost_cb = handle_lost_events,
+    };
 
     // Create a perf buffer
-    struct perf_buffer *pb = perf_buffer__new(bpf_map__fd(perf_map), 8, &handle_event, &handle_lost_events,NULL, NULL);
+    struct perf_buffer *pb = perf_buffer__new(bpf_map__fd(perf_map), 8, &pb_opts);
     if (libbpf_get_error(pb)) {
         fprintf(stderr, "ERROR: creating perf buffer failed\n");
         return 1;
@@ -119,9 +119,6 @@ int main(int argc, char **argv) {
             perror("perf_buffer__poll");
             break;
         }
-    }
-    while(!stop) {
-        sleep(1);
     }
 
     // Clean up

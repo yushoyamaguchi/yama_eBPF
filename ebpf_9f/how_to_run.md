@@ -20,13 +20,15 @@ sudo bpftool map dump name <map_name>
 
 
 # attach_event1.cのビルド
+gcc -o attach_event2 attach_event2.c -lbpf
+
 gcc -o attach_event1 attach_event1.c -I/home/yusho/dev/2024/others/libbpf/src -L/home/yusho/dev/2024/others/libbpf/src -lbpf -lelf -lz
 
 # attach_event1でbpfプログラムをattach
-sudo ./attach_event1 host0
+sudo ./attach_event2 host0
+
+sudo LD_LIBRARY_PATH=~/dev/2024/others/libbpf/src ./attach_event1 host0
 
 # netnsでpingを実行
 sudo ip netns exec host0 ping 10.0.0.2
 
-# ビルドしたlibbpfを指定して実行
-sudo LD_LIBRARY_PATH=~/dev/2024/others/libbpf/src ./attach_event1 host0
