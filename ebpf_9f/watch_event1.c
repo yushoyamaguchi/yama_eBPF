@@ -72,6 +72,7 @@ int main(int argc, char **argv) {
     }
 
     // Clean up
+    printf("Cleaning up...\n");
     perf_buffer__free(pb);
     bpf_object__close(obj);
 
