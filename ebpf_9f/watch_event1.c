@@ -38,6 +38,7 @@ int main(int argc, char **argv) {
 
     if (bpf_object__load(obj)) {
         fprintf(stderr, "ERROR: loading BPF object file failed\n");
+        bpf_object__close(obj);
         return 1;
     }
 
@@ -45,6 +46,7 @@ int main(int argc, char **argv) {
     struct bpf_map *perf_map = bpf_object__find_map_by_name(obj, "xdp_perf_event_map");
     if (!perf_map) {
         fprintf(stderr, "ERROR: finding perf event map in BPF object file failed\n");
+        bpf_object__close(obj);
         return 1;
     }
 
@@ -54,8 +56,11 @@ int main(int argc, char **argv) {
     struct perf_buffer *pb = perf_buffer__new(bpf_map__fd(perf_map), 8, &handle_event, &handle_lost_events, NULL, NULL);
     if (libbpf_get_error(pb)) {
         fprintf(stderr, "ERROR: creating perf buffer failed\n");
+        bpf_object__close(obj);
         return 1;
     }
+
+    printf("Perf buffer created, starting polling...\n");
 
     // Poll the perf buffer
     while (!stop) {
