@@ -29,6 +29,10 @@ sudo ./attach_event2 host0
 
 sudo LD_LIBRARY_PATH=~/dev/2024/others/libbpf/src ./attach_watch_event1 host0
 
+sudo LD_LIBRARY_PATH=~/dev/2024/others/libbpf/src ./attach_event1 host0
+
+sudo LD_LIBRARY_PATH=~/dev/2024/others/libbpf/src ./watch_event1
+
 # netnsでpingを実行
 sudo ip netns exec host0 ping 10.0.0.2
 
