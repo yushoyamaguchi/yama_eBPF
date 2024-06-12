@@ -8,7 +8,9 @@ struct data_t {
 // Define the perf event array map
 struct {
     __uint(type, BPF_MAP_TYPE_PERF_EVENT_ARRAY);
-    __uint(max_entries, 128);
+    __uint(max_entries, 0);
+    __type(key, int);
+    __type(value, int);
 } xdp_perf_event_map SEC(".maps");
 
 SEC("xdp")
