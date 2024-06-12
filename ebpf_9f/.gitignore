@@ -1,2 +1,4 @@
 attach_event1
+attach_watch_event1
+watch_event1
 attach_event2
