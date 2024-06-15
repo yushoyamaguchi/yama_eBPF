@@ -1,19 +1,17 @@
-#include <linux/bpf.h>
+#include "include/vmlinux.h"
 #include <bpf/bpf_helpers.h>
-#include <linux/types.h>
-#include <stdint.h>
 
 struct data_t {
     __s32 pkt_len;
 };
 
 // Define the perf event array map
-struct bpf_map_def SEC("maps") xdp_perf_event_map = {
-    .type = BPF_MAP_TYPE_PERF_EVENT_ARRAY,
-    .key_size = sizeof(int),
-    .value_size = sizeof(int),
-    .max_entries = 128,
-};
+struct {
+    __uint(type, BPF_MAP_TYPE_PERF_EVENT_ARRAY);
+    __uint(max_entries, 0);
+    __type(key, int);
+    __type(value, int);
+} xdp_perf_event_map SEC(".maps");
 
 SEC("xdp")
 int xdp_prog(struct xdp_md *ctx) {
