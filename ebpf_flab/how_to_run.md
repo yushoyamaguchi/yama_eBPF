@@ -25,7 +25,7 @@ gcc -o attach_watch_event1 attach_watch_event1.c -I/home/y-yamaguchi/yusho/2023/
 
 gcc -o attach_map_event1 attach_map_event1.c -I/home/y-yamaguchi/yusho/2023/others/libbpf/src -L/home/y-yamaguchi/yusho/2023/others/libbpf/src -lbpf -lelf -lz
 
-gcc -o dump_map dump_map.c -I/home/y-yamaguchi/yusho/2023/others/libbpf/src -L/home/y-yamaguchi/yusho/2023/others/libbpf/src -lbpf -lelf -lz
+gcc -o dump_event dump_event.c -I/home/y-yamaguchi/yusho/2023/others/libbpf/src -L/home/y-yamaguchi/yusho/2023/others/libbpf/src -lbpf -lelf -lz
 
 # attach_event1でbpfプログラムをattach
 sudo ./attach_event2 host0
@@ -36,7 +36,7 @@ sudo LD_LIBRARY_PATH=/home/y-yamaguchi/yusho/2023/others/libbpf/src ./attach_map
 
 sudo LD_LIBRARY_PATH=/home/y-yamaguchi/yusho/2023/others/libbpf/src ./watch_event1
 
-sudo LD_LIBRARY_PATH=/home/y-yamaguchi/yusho/2023/others/libbpf/src ./dump_map
+sudo LD_LIBRARY_PATH=/home/y-yamaguchi/yusho/2023/others/libbpf/src ./dump_event
 
 
 # mapのpin
