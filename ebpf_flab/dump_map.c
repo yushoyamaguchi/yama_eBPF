@@ -19,8 +19,13 @@ void sigint_handler(int sig) {
     stop = 1;
 }
 
+struct data_t {
+    __s32 pkt_len;
+};
+
 void handle_event(void *ctx, int cpu, void *data, __u32 size) {
-    printf("Received event: %s\n", (char *)data);
+    struct data_t *e = data;
+    printf("Packet length: %d\n", e->pkt_len);
 }
 
 // Callback function for lost samples

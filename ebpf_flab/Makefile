@@ -49,6 +49,7 @@ clean-topology:
 	$(SUDO) ip netns del host6 2>/dev/null || true
 	$(SUDO) ip netns del host7 2>/dev/null || true
 	$(SUDO) ip link del dev vipdev 2>/dev/null || true
+	$(SUDO) unlink /sys/fs/bpf/xdp_perf_event_map
 
 .PHONY: log
 log:

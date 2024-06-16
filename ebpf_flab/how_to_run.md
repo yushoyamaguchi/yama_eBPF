@@ -42,5 +42,4 @@ sudo LD_LIBRARY_PATH=/home/y-yamaguchi/yusho/2023/others/libbpf/src ./dump_map
 # mapのpin
 sudo bpftool map pin id 78 /sys/fs/bpf/xdp_perf_event_map
 
-
-sudo bpftool map pin id 78 /sys/fs/bpf/xdp_perf_event_map
+sudo unlink /sys/fs/bpf/xdp_perf_event_map

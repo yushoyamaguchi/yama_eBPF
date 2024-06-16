@@ -36,6 +36,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    //新しくロードしちゃってるので、既に動いてるBPFプログラムが出力したperf eventは受け取れない
     if (bpf_object__load(obj)) {
         fprintf(stderr, "ERROR: loading BPF object file failed\n");
         bpf_object__close(obj);
