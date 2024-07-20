@@ -40,6 +40,8 @@ sudo LD_LIBRARY_PATH=/home/y-yamaguchi/yusho/2023/others/libbpf/src ./dump_event
 
 
 # mapのpin
+pinすることで、bpf_object_get()でmapを取得できるようになる
+すでに存在するmapに対してpollをするには、これが必要である(attachも自プログラム内でする時と同じような方法で、mapを見つけるとはできなかった)
 sudo bpftool map pin id 78 /sys/fs/bpf/xdp_perf_event_map
 
 sudo unlink /sys/fs/bpf/xdp_perf_event_map
