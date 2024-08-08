@@ -12,27 +12,13 @@ BPF_HASH(alloc_counts, u32, u64);  // PID -> alloc count
 BPF_HASH(free_counts, u32, u64);   // PID -> free count
 
 static inline bool is_wireguard_proc(char *comm) {
-    char wg[] = "wg";
-    char wireguard[] = "wireguard";
-    int len = sizeof(comm);
+    char wg[] = "kworker";
 
-    // comm に "wg" を含むか確認
-    for (int i = 0; i < len - sizeof(wg) + 1; i++) {
+    // comm に "kworker" を含むか確認
+    for (int i = 0; i <= TASK_COMM_LEN - sizeof(wg) + 1; i++) {
         bool found = true;
         for (int j = 0; j < sizeof(wg) - 1; j++) {
             if (comm[i + j] != wg[j]) {
-                found = false;
-                break;
-            }
-        }
-        if (found) return true;
-    }
-
-    // comm に "wireguard" を含むか確認
-    for (int i = 0; i < len - sizeof(wireguard) + 1; i++) {
-        bool found = true;
-        for (int j = 0; j < sizeof(wireguard) - 1; j++) {
-            if (comm[i + j] != wireguard[j]) {
                 found = false;
                 break;
             }
