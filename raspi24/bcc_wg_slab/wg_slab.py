@@ -98,7 +98,7 @@ print("Tracing kmem_cache allocations for WireGuard processes... Ctrl+C to end."
 # 結果表示用の関数
 def print_stats():
     print("\n%-6s %-16s %-10s %-10s" % ("PID", "COMM", "ALLOCS", "FREES"))
-    for k, v in sorted(b["alloc_counts"].items()):
+    for k, v in sorted(b["alloc_counts"].items(), key=lambda item: item[0].value):
         pid = k.value
         alloc_count = v.value
         free_count = b["free_counts"][k].value if k in b["free_counts"] else 0
@@ -108,6 +108,7 @@ def print_stats():
         except:
             # プロセスが終了している場合はスキップ
             continue
+
 
 # メインループ
 try:
