@@ -14,18 +14,33 @@ BPF_HASH(free_counts, u32, u64);   // PID -> free count
 static inline bool is_wireguard_proc(char *comm) {
     char wg[] = "wg";
     char wireguard[] = "wireguard";
-    
-    // wgで始まるか確認
-    if (comm[0] == wg[0] && comm[1] == wg[1])
-        return true;
-        
-    // wireguardで始まるか確認
-    #pragma unroll
-    for (int i = 0; i < sizeof(wireguard) - 1; i++) {
-        if (comm[i] != wireguard[i])
-            return false;
+    int len = sizeof(comm);
+
+    // comm に "wg" を含むか確認
+    for (int i = 0; i < len - sizeof(wg) + 1; i++) {
+        bool found = true;
+        for (int j = 0; j < sizeof(wg) - 1; j++) {
+            if (comm[i + j] != wg[j]) {
+                found = false;
+                break;
+            }
+        }
+        if (found) return true;
     }
-    return true;
+
+    // comm に "wireguard" を含むか確認
+    for (int i = 0; i < len - sizeof(wireguard) + 1; i++) {
+        bool found = true;
+        for (int j = 0; j < sizeof(wireguard) - 1; j++) {
+            if (comm[i + j] != wireguard[j]) {
+                found = false;
+                break;
+            }
+        }
+        if (found) return true;
+    }
+
+    return false;
 }
 
 // kmem_cache_alloc()の監視
