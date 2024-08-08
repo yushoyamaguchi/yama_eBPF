@@ -11,7 +11,7 @@ bpf_text = """
 BPF_HASH(alloc_counts, u32, u64);  // PID -> alloc count
 BPF_HASH(free_counts, u32, u64);   // PID -> free count
 
-static inline bool is_wireguard_proc(char *comm) {
+static inline bool is_kworker(char *comm) {
     char wg[] = "kworker";
 
     // comm に "kworker" を含むか確認
@@ -36,8 +36,8 @@ int trace_kmem_alloc(struct pt_regs *ctx) {
     char comm[TASK_COMM_LEN];
     bpf_get_current_comm(&comm, sizeof(comm));
 
-    // wireguardまたはwgプロセスのみを対象
-    if (!is_wireguard_proc(comm))
+    // kworkerのみを対象
+    if (!is_kworker(comm))
         return 0;
 
     u64 *count = alloc_counts.lookup(&pid);
@@ -57,8 +57,8 @@ int trace_kmem_free(struct pt_regs *ctx) {
     char comm[TASK_COMM_LEN];
     bpf_get_current_comm(&comm, sizeof(comm));
 
-    // wireguardまたはwgプロセスのみを対象
-    if (!is_wireguard_proc(comm))
+    // kworkerプロセスのみを対象
+    if (!is_kworker(comm))
         return 0;
 
     u64 *count = free_counts.lookup(&pid);
