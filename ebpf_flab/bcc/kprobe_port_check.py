@@ -4,21 +4,29 @@ import ctypes
 
 # 定数定義
 FUNCTION_NAME = "emulator_pio_in"
+TARGET_PORT = 0x84
 
 # BPFプログラム
 bpf_program = f"""
+
 BPF_HASH(counter, u64, u64);
 
-int trace_{FUNCTION_NAME}(struct pt_regs *ctx) {{
+int trace_{FUNCTION_NAME}(struct pt_regs *ctx, struct kvm_vcpu *vcpu) {{
     u64 key = 0;
     u64 *val;
+    u16 port;
 
-    val = counter.lookup(&key);
-    if (val) {{
-        (*val)++;
-    }} else {{
-        u64 zero = 0;
-        counter.update(&key, &zero);
+    // vcpu->run->io.port にアクセスするためにbpf_probe_read_userを使用
+    bpf_probe_read_user(&port, sizeof(port), &vcpu->run->io.port);
+
+    if (port == {TARGET_PORT}) {{
+        val = counter.lookup(&key);
+        if (val) {{
+            (*val)++;
+        }} else {{
+            u64 zero = 1; // 最初のアクセスなので1に初期化
+            counter.update(&key, &zero);
+        }}
     }}
     return 0;
 }}
@@ -43,9 +51,9 @@ try:
         try:
             val = b["counter"][key]
             diff = val.value - prev_count
-            print(f"{FUNCTION_NAME} called {diff} times since last check")
+            print(f"Port {hex(TARGET_PORT)} accessed {diff} times since last check")
             prev_count = val.value
         except KeyError:
-            print(f"{FUNCTION_NAME} called 0 times since last check")
+            print(f"Port {hex(TARGET_PORT)} accessed 0 times since last check")
 except KeyboardInterrupt:
     print("Tracing ended.")
