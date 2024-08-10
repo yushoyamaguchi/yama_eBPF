@@ -3,6 +3,8 @@
 #include <bpf/bpf_helpers.h>
 #include <bpf/bpf_core_read.h>
 
+#define TARGET_PORT 0x84
+
 struct {
     __uint(type, BPF_MAP_TYPE_ARRAY);
     __uint(max_entries, 1);
@@ -21,7 +23,7 @@ int bpf_prog1(struct pt_regs *ctx)
     bpf_core_read(&port, sizeof(port), (void *)((char *)ctx + offsetof(struct pt_regs, dx)));
 
     // Check if the port is 0 and increment the counter
-    if (port > 0) {
+    if (port == TARGET_PORT) {
         val = bpf_map_lookup_elem(&counter, &key);
         if (val) {
             (*val)++;
