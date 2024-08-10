@@ -8,16 +8,16 @@ TARGET_PORT = 0x84
 
 # BPFプログラム
 bpf_program = f"""
+#include <uapi/linux/ptrace.h>
 
 BPF_HASH(counter, u64, u64);
 
-int trace_{FUNCTION_NAME}(struct pt_regs *ctx, struct kvm_vcpu *vcpu) {{
+int trace_{FUNCTION_NAME}(struct pt_regs *ctx) {{
     u64 key = 0;
     u64 *val;
-    u16 port;
+    unsigned short port;
 
-    // vcpu->run->io.port にアクセスするためにbpf_probe_read_userを使用
-    bpf_probe_read_user(&port, sizeof(port), &vcpu->run->io.port);
+    bpf_probe_read_kernel(&port, sizeof(port), (void *)PT_REGS_PARM3(ctx));
 
     if (port == {TARGET_PORT}) {{
         val = counter.lookup(&key);
