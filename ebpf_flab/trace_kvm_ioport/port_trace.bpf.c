@@ -15,12 +15,21 @@ struct {
 SEC("kprobe/emulator_pio_in")
 int bpf_prog1(struct pt_regs *ctx)
 {
+    struct kvm_vcpu *vcpu;
+    struct kvm_run *run;
     __u64 *val;
     __u32 key = 0;
-    __u64 port;
+    unsigned short port;
 
     // Use PT_REGS_PARM3 macro directly without taking its address
-    bpf_core_read(&port, sizeof(port), (void *)((char *)ctx + offsetof(struct pt_regs, dx)));
+    //bpf_core_read(&port, sizeof(port), (void *)((char *)ctx + offsetof(struct pt_regs, dx)));
+
+    // Read the first argument (vcpu) from the function arguments
+    BPF_CORE_READ_INTO(&vcpu, ctx, di); 
+    // Access the kvm_run structure from the vcpu structure
+    bpf_core_read(&run, sizeof(run), &vcpu->run);
+    // Access the io.port field from the kvm_run structure
+    bpf_core_read(&port, sizeof(port), &run->io.port);
 
     // Check if the port is 0 and increment the counter
     if (port == TARGET_PORT) {
