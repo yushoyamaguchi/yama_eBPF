@@ -1,82 +1,72 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <errno.h>
 #include <bpf/libbpf.h>
 #include <bpf/bpf.h>
+#include <unistd.h>
 
-#define TARGET_PORT 0x84
+#define COUNTER_MAP_NAME "counter"
 
 int main(int argc, char **argv)
 {
     struct bpf_object *obj;
-    struct bpf_link *link = NULL;
-    int map_fd, err;
-    __u64 key = 0;
-    __u64 prev_count = 0;
-    char filename[] = "port_trace.bpf.o";
+    struct bpf_link *link;
+    int err;
+    int map_fd;
 
-    // Load the BPF object file
-    obj = bpf_object__open(filename);
+    // BPFオブジェクトファイルを読み込む
+    obj = bpf_object__open_file("port_trace.bpf.o", NULL);
     if (libbpf_get_error(obj)) {
-        fprintf(stderr, "Failed to open BPF object file: %s\n", filename);
+        fprintf(stderr, "Failed to open BPF object file: %d\n", (int)libbpf_get_error(obj));
         return 1;
     }
 
-    // Load the BPF program
+    // BPFプログラムをロードする
     err = bpf_object__load(obj);
     if (err) {
-        fprintf(stderr, "Failed to load BPF program\n");
-        bpf_object__close(obj);
+        fprintf(stderr, "Failed to load BPF object: %d\n", err);
         return 1;
     }
 
-    // Find the map file descriptor
-    map_fd = bpf_object__find_map_fd_by_name(obj, "counter");
-    if (map_fd < 0) {
-        fprintf(stderr, "Failed to find BPF map\n");
-        bpf_object__close(obj);
-        return 1;
-    }
-
-    // Find the program file descriptor
-    struct bpf_program *prog = bpf_object__find_program_by_name(obj, "trace_emulator_pio_in");
+    // BPFプログラムを取得
+    struct bpf_program *prog = bpf_object__find_program_by_name(obj, "bpf_prog1");
     if (!prog) {
-        fprintf(stderr, "Failed to find BPF program\n");
-        bpf_object__close(obj);
+        fprintf(stderr, "Failed to find BPF program: %s\n", strerror(errno));
         return 1;
     }
 
-    // Attach the BPF program to the kprobe
-    link = bpf_program__attach_kprobe(prog, false, "emulator_pio_in");
-    if (!link) {
-        fprintf(stderr, "Failed to attach kprobe\n");
-        bpf_object__close(obj);
+    // kprobeにBPFプログラムをアタッチ
+    link = bpf_program__attach(prog);
+    if (libbpf_get_error(link)) {
+        fprintf(stderr, "Failed to attach BPF program: %s\n", strerror(errno));
         return 1;
     }
 
-    printf("Tracing emulator_pio_in... Ctrl-C to end.\n");
+    // カウンターマップのファイルディスクリプタを取得
+    map_fd = bpf_object__find_map_fd_by_name(obj, COUNTER_MAP_NAME);
+    if (map_fd < 0) {
+        fprintf(stderr, "Failed to find BPF map: %s\n", strerror(errno));
+        return 1;
+    }
 
+    printf("BPF program loaded, attached successfully, and counter map found.\n");
+
+    // カウンター値を取得して表示するループ
+    __u32 key = 0;
+    __u64 value;
     while (1) {
-        sleep(5);
+        sleep(5); // 5秒ごとにカウンター値を取得
 
-        // Retrieve the counter value from the BPF map
-        __u64 val = 0;
-        err = bpf_map_lookup_elem(map_fd, &key, &val);
-        if (err == 0) {
-            __u64 diff = val - prev_count;
-            printf("Port 0x%x accessed %llu times since last check\n", TARGET_PORT, diff);
-            prev_count = val;
-        } else if (errno == ENOENT) {
-            printf("Port 0x%x accessed 0 times since last check\n", TARGET_PORT);
+        if (bpf_map_lookup_elem(map_fd, &key, &value) == 0) {
+            printf("Counter value: %llu\n", value);
         } else {
-            fprintf(stderr, "Failed to lookup BPF map: %d\n", err);
-            break;
+            fprintf(stderr, "Failed to read counter value: %s\n", strerror(errno));
         }
     }
 
-    // Clean up
+    // 後始末
     bpf_link__destroy(link);
     bpf_object__close(obj);
+
     return 0;
 }
