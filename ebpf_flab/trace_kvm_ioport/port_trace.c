@@ -54,11 +54,14 @@ int main(int argc, char **argv)
     // カウンター値を取得して表示するループ
     __u32 key = 0;
     __u64 value;
+    __u64 prev_value = 0;
     while (1) {
         sleep(5); // 5秒ごとにカウンター値を取得
 
         if (bpf_map_lookup_elem(map_fd, &key, &value) == 0) {
-            printf("Counter value: %llu\n", value);
+            printf("Counter value: %llu\n", value-prev_value);
+            prev_value = value;
+
         } else {
             fprintf(stderr, "Failed to read counter value: %s\n", strerror(errno));
         }
