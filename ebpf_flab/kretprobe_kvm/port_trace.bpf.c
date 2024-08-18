@@ -23,6 +23,9 @@ int bpf_prog1(struct pt_regs *ctx)
     unsigned short port;
 
     // Get reterun value
+    //bpf_core_read(&exit_qualification, sizeof(exit_qualification), (void *)((char *)ctx + offsetof(struct pt_regs, ax)));
+
+    // Read the first argument (vcpu) from the function arguments
     BPF_CORE_READ_INTO(&vcpu, ctx, di); 
     bpf_core_read(&exit_qualification, sizeof(exit_qualification), &vcpu->arch.exit_qualification);
     port = exit_qualification >> 16;
