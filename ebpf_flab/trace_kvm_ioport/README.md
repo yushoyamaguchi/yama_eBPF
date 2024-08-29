@@ -1,7 +1,7 @@
+# How to Run
+```
+make vmlinux
 make port_trace.bpf.o
-
-bpftool gen skeleton port_trace.bpf.o > port_trace.skel.h
-
 gcc -g -O2 -Wall port_trace.c -lbpf -lelf -o port_trace
-
 sudo ./port_trace
+```
