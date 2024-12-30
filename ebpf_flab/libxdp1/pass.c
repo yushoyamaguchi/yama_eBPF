@@ -9,7 +9,7 @@
 #include <xdp/xsk.h>
 
 // 実際に使用するインタフェース名と、処理対象のIPアドレスなど
-#define IFNAME      "eth0"
+#define IFNAME      "veth-a"
 #define QUEUE_ID    0
 #define TARGET_IP   "192.168.20.1"
 
