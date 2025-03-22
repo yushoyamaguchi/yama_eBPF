@@ -4,7 +4,7 @@
 
 
 // Define the read-only data section for the string
-const char hello_str[] = "hello world\n";
+const char hello_str[] = "hello world yamaguchi\n";
 
 SEC("kprobe/__x64_sys_execve")
 int hello_world(struct pt_regs *ctx) {
