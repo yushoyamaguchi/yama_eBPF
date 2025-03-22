@@ -18,7 +18,7 @@ bpf-skel: bpf
 	bpftool gen skeleton hello_to_pipe.bpf.o > hello_to_pipe.skel.h
 
 libbpf-prog:
-	gcc -g -O2 -Wall check_execv.c -lbpf -lelf -o check_execv
+	gcc -g -O2 -Wall check_execv.c /usr/lib/x86_64-linux-gnu/libbpf.a /usr/lib/x86_64-linux-gnu/libelf.a -lz -o check_execv
 
 run: sudo-in-advance bpf-skelton libbpf-prog
 	sudo ./check_execv
